@@ -1,25 +1,38 @@
-import time 
-from typing import Optional
+import os
+from pathlib import Path
+from itertools import product
+from typing import Any, Iterator
 
-from memory_profiler import memory_usage
+import numpy as np
+import pandas as pd
 
-def performance_decorator(enabled=True, buffer: Optional[dict] = None):
-    def actual_decorator(func):
-        def wrapper(*args, **kwargs):
-            if enabled:
-                mem_usage_before = memory_usage(max_usage=True)
-                s_time = time.time()
-                result = func(*args, **kwargs)
-                elapsed_time = time.time() - s_time
-                mem_usage_after = memory_usage(max_usage=True)
-                memory_used = mem_usage_after - mem_usage_before
-                if buffer is not None:
-                    buffer[func.__name__ + '_time'] = elapsed_time
-                    buffer[func.__name__ + '_mem'] = memory_used
-                else:
-                    print(f"{func.__name__} used {memory_used} MiB and took {elapsed_time} seconds")
-            else:
-                result = func(*args, **kwargs)
-            return result
-        return wrapper
-    return actual_decorator
+def create_dir_if_not_exists(directory: str) -> os.PathLike:
+    path = Path(directory)
+    if not path.exists():
+        path.mkdir(parents=True, exist_ok=True)
+    return path
+
+def query_df(df_res, query: dict) -> pd.DataFrame:
+    mask = 1
+    for col, val in query.items():
+       mask &= (df_res[col] == val)
+    return df_res[mask]
+
+def extend_results_dict(res: dict, **kwargs) -> None:
+    for key, value in kwargs.items():
+        res[key].extend(value.copy())
+
+def update_results_dict(res: dict, **kwargs) -> None:
+    for key, value in kwargs.items():
+        res[key].append(value)
+
+def dirprod_dict(dt: dict[str, list[Any]]) -> Iterator[dict[str, Any]]:
+    keys = dt.keys()
+    for vals in product(*dt.values()):
+        yield dict(zip(keys, vals))
+
+def prepare_for_dump(dt):
+    for k in dt.keys():
+        if isinstance(dt[k][0], np.ndarray):
+            dt[k] = [list(v) for v in dt[k]]
+    return dt

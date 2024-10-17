@@ -71,7 +71,7 @@ def update_quantized_weights(
         # Preprocess:
         ww_hadamard /= wk.T.conj().dot(wk)
         for p, feature_map in enumerate(fmaps_list):
-            fk_mtx = feature_map(x[:, k], q)                                                          ### Save for better computations? Memory?
+            fk_mtx = feature_map(x[:, k], q)    ### Save for better computations? Memory?
             fwh_matrices[p] /= fk_mtx.dot(wk) # remove k-th factor
             if lambdas[p]: # can be zero 
                 Fk += lambdas[p] * khatri_rao_row(fwh_matrices[p], fk_mtx) # Fortran Ordering
@@ -147,7 +147,7 @@ def q_cpr_f(
     for ep in range(n_epoch):
         weights, lambdas = update_feature_weights(weights=weights, lambdas=lambdas, 
             beta=beta, l_reg=l_reg, ns_l1=ns_l1, l_pos=l_pos, **_shared)
-        if l_pos and (ep == 0): lambdas /= np.sum(lambdas) ############################### Not sure about it :)
+        if l_pos and (ep == 0): lambdas /= np.sum(lambdas)
         rc(weights=weights, lambdas=lambdas)
         weights, lambdas = update_quantized_weights(weights=weights, lambdas=lambdas,
             alpha=alpha, fwh_matrices=fwh_matrices, ww_hadamard=ww_hadamard, **_shared)

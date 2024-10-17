@@ -1,4 +1,4 @@
-name: temp_general_env
+name: general_env
 channels:
   - defaults
   - conda-forge

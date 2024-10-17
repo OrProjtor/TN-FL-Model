@@ -1,10 +1,9 @@
 from typing import Optional
 
 import pandas as pd
-from sklearn.model_selection import (
-    train_test_split,
-)
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
 
 def print_df_stats(df: pd.DataFrame, save_path=None) -> None:
     n_samples, n_features = df.shape
@@ -54,6 +53,24 @@ def scale_data(x, x_test, y, y_test) -> tuple[pd.DataFrame]:
     mms.fit(x)
     x, x_test = mms.transform(x), mms.transform(x_test)
     if y.dtype == float:
+        y_mean, y_std = y.mean(), y.std()
+        y, y_test = (y - y_mean) / y_std, (y_test - y_mean) / y_std
+    return x, x_test, y, y_test
+
+def get_mse_for_model(model, x_train, x_test, y_train, y_test):
+    y_train_mean, y_train_std = y_train.mean(), y_train.std()
+    y_train = (y_train - y_train_mean) / y_train_std
+    y_test = (y_test - y_train_mean) / y_train_std
+    model.fit(x_train, y_train) 
+    return mean_squared_error(y_test, model.predict(x_test))
+
+def load_transform_data(data_path, test_size, split_seed, transform_x: bool = True, transform_y: bool = True):
+    x, x_test, y, y_test = load_prepare_data(data_path, test_size, split_seed)
+    if transform_x: 
+        mms = MinMaxScaler()
+        mms.fit(x)
+        x, x_test = mms.transform(x), mms.transform(x_test)  
+    if transform_y:
         y_mean, y_std = y.mean(), y.std()
         y, y_test = (y - y_mean) / y_std, (y_test - y_mean) / y_std
     return x, x_test, y, y_test

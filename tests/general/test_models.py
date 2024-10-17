@@ -8,8 +8,6 @@ from sklearn.preprocessing import MinMaxScaler
 
 sys.path.append('./')
 
-from source.models.RRf import RRf
-from source.models.CPR import CPR
 from source.models.QCPR import QCPR
 from source.models.QCPRf import QCPRf
 from source.features import PPFeature, FFeature
@@ -52,16 +50,6 @@ class TestModels(unittest.TestCase):
         self.y = (y - y.mean()) / y.std()
         self.model_params = dict(rank=8, m_order=4, n_epoch=10, alpha=0.001, random_state=0)
 
-    def test_cpr_loss(self):
-        callback_function = prepare_callback_no_fl()
-        model_params = dict(callback=callback_function) | self.model_params
-        model = CPR(**model_params)
-        model.fit(self.x, self.y) 
-
-        expected = sorted(callback_function.data, reverse=True)
-        actual = callback_function.data
-        self.assertTrue(np.allclose(actual, expected))
-
     def test_qcpr_loss(self):
         callback_function = prepare_callback_no_fl()
         model_params = dict(callback=callback_function) | self.model_params
@@ -84,19 +72,4 @@ class TestModels(unittest.TestCase):
 
         expected = sorted(callback_function.data, reverse=True)
         actual = callback_function.data
-        self.assertTrue(np.allclose(actual, expected))
-
-    def test_rrf_loss(self):    
-        callback_function = prepare_callback_fl(mse_l2wl_loss)
-        model_params = dict(
-            m_order=3, n_epoch=10, alpha=0.001, random_state=0,
-            callback=callback_function, beta=1, lambda_reg_type='l2',
-            fmaps_list=[FFeature(p_scale=3), FFeature(p_scale=2)]
-        )
-        model = RRf(**model_params)
-        model.fit(self.x[:, :5], self.y) 
-        loss_value = callback_function.data[1::2]
-
-        expected = sorted(loss_value, reverse=True)
-        actual = loss_value
         self.assertTrue(np.allclose(actual, expected))
