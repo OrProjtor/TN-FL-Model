@@ -66,7 +66,6 @@ class QCPRf(RegressorMixin, BaseEstimator):
         return mappings
 
     def fit(self, X, y, xy_test: Optional[tuple] = None):
-        """ TODO """
         X, y = check_X_y(X, y)
         self._feature_maps_list = self._prepare_feature_mappings()
         self.weights_, self.lambdas_, self.kd_ = q_cpr_f(
@@ -80,14 +79,12 @@ class QCPRf(RegressorMixin, BaseEstimator):
         return self
     
     def predict(self, X):
-        """ TODO """
         X = check_array(X)
         check_is_fitted(self, 'is_fitted_')
         return predict_score(
             X, self.kd_, self.weights_, self.lambdas_, self._feature_maps_list)
     
     def score(self, X, y):
-        """ TODO """
         return r2_score(y, self.predict(X))
     
 def _check_input_params(m_order: int) -> None:

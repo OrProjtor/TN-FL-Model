@@ -11,7 +11,7 @@ from ..cpr import cpr
 from ..model_functionality import predict_score
 
 class QCPR(RegressorMixin, BaseEstimator):
-    """ TODO """
+    """ Quantized CP Regression Model (QCPR). """
     def __init__(
         self, 
         rank: int = 1, 
@@ -50,7 +50,6 @@ class QCPR(RegressorMixin, BaseEstimator):
             raise ValueError(f'Bad feature_map = "{self.feature_map}". See docs.')
 
     def fit(self, X, y, xy_test: Optional[tuple] = None):
-        """ TODO """
         X, y = check_X_y(X, y)
         self._feature_mapping = self._prepare_feature_mapping()
         self.weights_, self.kd_ = cpr(
@@ -62,11 +61,9 @@ class QCPR(RegressorMixin, BaseEstimator):
         return self
     
     def predict(self, X):
-        """ TODO """
         X = check_array(X)
         check_is_fitted(self, 'is_fitted_')
         return predict_score(X, self.kd_, self.weights_, self._feature_mapping)
     
     def score(self, X, y):
-        """ TODO """
         return r2_score(y, self.predict(X))
